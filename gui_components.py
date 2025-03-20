@@ -265,7 +265,7 @@ class HexasnipeApp:
         except tk.TclError:
             exact_count = 0
         
-        if exact_count and exact_count > len(components):
+        if exact_count and exact_count > len(components) + 1:
             if not self.allow_duplicates.get():
                 self.allow_duplicates.set(True)
                 self.duplicate_label.config(text="Automatically turned on")
