@@ -208,6 +208,7 @@ class HexasnipeApp:
             self.categories.append(category)
             self.categories.sort()
             self.update_category_menus()
+            self.update_existing_components_with_category(category)
     
     def update_category_menus(self):
         for widget in self.component_frame.winfo_children():
@@ -216,6 +217,13 @@ class HexasnipeApp:
                 for category in self.categories:
                     widget['menu'].add_command(label=category, command=tk._setit(widget['variable'], category))
     
+    def update_existing_components_with_category(self, category):
+        for component in self.components:
+            category_menu = component[3]
+            if category_menu:
+                menu = category_menu['menu']
+                menu.add_command(label=category, command=tk._setit(component[2], category))
+
     def add_component(self):
         frame = ttk.Frame(self.component_frame, padding="5", style="Custom.TFrame")
         frame.pack(pady=5, fill="x")
@@ -231,14 +239,15 @@ class HexasnipeApp:
         color_entry.pack(side=tk.LEFT, padx=5, fill="x", expand=True)
         ttk.Button(frame, text="Pick", command=lambda: self.pick_color(color_var, color_entry), style="Custom.TButton").pack(side=tk.LEFT, padx=5)
         
+        category_menu = None
         if category_var is not None:
             ttk.Label(frame, text="Category:", style="Custom.TLabel").pack(side=tk.LEFT, padx=5)
             category_menu = ttk.OptionMenu(frame, category_var, *self.categories, style="Custom.TMenubutton")
             category_menu.pack(side=tk.LEFT, padx=5, fill="x", expand=True)
         
-        self.components.append((name_var, color_var, category_var))
+        self.components.append((name_var, color_var, category_var, category_menu))
         self.component_canvas.configure(scrollregion=self.component_canvas.bbox("all"))
-        ttk.Button(frame, text="- Remove", command=lambda: self.remove_component(frame, (name_var, color_var, category_var)), style="Custom.TButton").pack(side=tk.LEFT, padx=5)
+        ttk.Button(frame, text="- Remove", command=lambda: self.remove_component(frame, (name_var, color_var, category_var, category_menu)), style="Custom.TButton").pack(side=tk.LEFT, padx=5)
     
     def remove_component(self, frame, component):
         frame.destroy()
@@ -294,6 +303,7 @@ class HexasnipeApp:
         rule_value = rule_value_var.get()
         if category and rule_type == "Amount":
             self.category_rules[category] = rule_value
+            self.update_existing_components_with_category(category)
 
     def _bind_mousewheel(self, canvas):
         if canvas.winfo_height() < canvas.bbox("all")[3]:
